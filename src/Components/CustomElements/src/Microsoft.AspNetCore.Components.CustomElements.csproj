@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <PropertyGroup>
     <TargetFramework>$(DefaultNetCoreTargetFramework)</TargetFramework>
@@ -18,9 +18,12 @@
     </ResolveStaticWebAssetsInputsDependsOn>
   </PropertyGroup>
 
-  <Target Name="IncludeCompileJsOutput" BeforeTargets="_ResolveJsModuleInputs">
+  <Target Name="IncludeCompileJsOutput" BeforeTargets="ResolveJSModuleStaticWebAssets;ResolveJsInitializerModuleStaticWebAssets">
     <ItemGroup>
       <_JsBuildOutput Include="$(InteropWorkingDir)dist\$(Configuration)\**" Exclude="$(InteropWorkingDir)dist\.gitignore" />
+      <_JsBuildOutput>
+        <RelativePath>%(_JsBuildOutput.RecursiveDir)%(Filename)%(Extension)</RelativePath>
+      </_JsBuildOutput>
     </ItemGroup>
 
     <DefineStaticWebAssets Condition="'@(_JsBuildOutput)' != ''"
@@ -30,11 +33,23 @@
       BasePath="_content\$(PackageId)"
       CandidateAssets="@(_JsBuildOutput)"
       RelativePathFilter="**.js"
+      RelativePathPattern="**"
     >
-      <Output TaskParameter="Assets" ItemName="StaticWebAsset" />
+      <Output TaskParameter="Assets" ItemName="_JSBuildStaticWebAsset" />
     </DefineStaticWebAssets>
 
+    <DefineStaticWebAssetEndpoints
+      Condition="'@(_JsBuildOutput)' != ''"
+      CandidateAssets="@(_JSBuildStaticWebAsset)"
+      ExistingEndpoints="@()"
+      ContentTypeMappings="@(StaticWebAssetContentTypeMapping)"
+    >
+      <Output TaskParameter="Endpoints" ItemName="_JSBuildStaticWebAssetEndpoint" />
+    </DefineStaticWebAssetEndpoints>
+
     <ItemGroup>
+      <StaticWebAsset Include="@(_JSBuildStaticWebAsset)" />
+      <StaticWebAssetEndpoint Include="@(_JSBuildStaticWebAssetEndpoint)" />
       <_JsBuildOutput Include="$(InteropWorkingDir)dist\$(Configuration)\**" Exclude="$(InteropWorkingDir)dist\.gitignore" />
       <FileWrites Include="$(_JsBuildOutput)" />
     </ItemGroup>

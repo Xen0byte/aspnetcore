@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - uses: martincostello/update-dotnet-sdk@8765302da88e1a78c845125626f3726190908593
+    - uses: martincostello/update-dotnet-sdk@76e2c0df2303d4f6a404228105ebb7d60ace0556 # v3.4.0
       with:
         quality: 'daily'
         repo-token: ${{ secrets.GITHUB_TOKEN }}

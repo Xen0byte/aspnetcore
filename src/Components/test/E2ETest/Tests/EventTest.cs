@@ -26,7 +26,7 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
 
     protected override void InitializeAsyncCore()
     {
-        Navigate(ServerPathBase, noReload: true);
+        Navigate(ServerPathBase);
     }
 
     [Fact]
@@ -72,7 +72,7 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
         var output = Browser.Exists(By.Id("output"));
         Assert.Equal(string.Empty, output.Text);
 
-        var other = Browser.Exists(By.Id("other"));
+        var other = Browser.Exists(By.Id("mouseover_label"));
 
         // Mouse over the button and then back off
         var actions = new Actions(Browser)
@@ -154,8 +154,6 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
         var output = Browser.Exists(By.Id("output"));
         Assert.Equal(string.Empty, output.Text);
 
-        var other = Browser.Exists(By.Id("other"));
-
         // Mousedown
         var actions = new Actions(Browser).ClickAndHold(input);
 
@@ -201,7 +199,6 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
     }
 
     [Fact]
-    [QuarantinedTest("https://github.com/dotnet/aspnetcore/issues/52783")]
     public void Cancel_CanTrigger()
     {
         Browser.MountTestComponent<DialogEventsComponent>();
@@ -335,9 +332,9 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
         var element = Browser.Exists(By.Id("disabled-div"));
         var eventLog = Browser.Exists(By.Id("event-log"));
 
-        Browser.Equal(string.Empty, () => eventLog.GetAttribute("value"));
+        Browser.Equal(string.Empty, () => eventLog.GetDomProperty("value"));
         element.Click();
-        Browser.Equal("Got event on div", () => eventLog.GetAttribute("value"));
+        Browser.Equal("Got event on div", () => eventLog.GetDomProperty("value"));
     }
 
     [Theory]
@@ -350,13 +347,13 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
         var element = Browser.Exists(By.CssSelector(elementSelector));
         var eventLog = Browser.Exists(By.Id("event-log"));
 
-        Browser.Equal(string.Empty, () => eventLog.GetAttribute("value"));
+        Browser.Equal(string.Empty, () => eventLog.GetDomProperty("value"));
         element.Click();
 
         // It's no use observing that the log is still empty, since maybe the UI just hasn't updated yet
         // To be sure that the preceding action has no effect, we need to trigger a different action that does have an effect
         Browser.Exists(By.Id("enabled-button")).Click();
-        Browser.Equal("Got event on enabled button", () => eventLog.GetAttribute("value"));
+        Browser.Equal("Got event on enabled button", () => eventLog.GetDomProperty("value"));
     }
 
     [Fact]
@@ -368,7 +365,7 @@ public class EventTest : ServerTestBase<ToggleExecutionModeServerFixture<Program
         var eventLog = Browser.Exists(By.Id("event-log"));
 
         SendKeysSequentially(input, "abc");
-        Browser.Equal("abc", () => input.GetAttribute("value"));
+        Browser.Equal("abc", () => input.GetDomProperty("value"));
         Browser.Equal(
             "Change event on item First with value a\n" +
             "Change event on item First with value ab\n" +
